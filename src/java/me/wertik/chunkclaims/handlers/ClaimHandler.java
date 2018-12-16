@@ -14,7 +14,7 @@ import java.util.List;
 
 public class ClaimHandler {
 
-    private static List<Claim> playerClaims;
+    private List<Claim> playerClaims;
 
     public ClaimHandler() {
         playerClaims = new ArrayList<>();
@@ -22,10 +22,10 @@ public class ClaimHandler {
 
     public void claimChunk(Player player) {
         Chunk chunk = player.getLocation().getChunk();
-
-        Claim claim = new Claim(player.getUniqueId().toString(), new ChunkLocation(chunk.getWorld().getName(), chunk.getX(), chunk.getZ()), System.currentTimeMillis() + 360000);
+        Claim claim = new Claim(player.getUniqueId().toString(), new ChunkLocation(chunk.getWorld().getName(), chunk.getX(), chunk.getZ()), System.currentTimeMillis() + Main.getInstance().getConfigLoader().config.getLong("global-options.expire-time") * 1000);
 
         playerClaims.add(claim);
+        Utils.fenceChunk(chunk);
     }
 
     public List<Claim> getClaims() {
@@ -57,6 +57,12 @@ public class ClaimHandler {
                 return true;
         }
         return false;
+    }
+
+    public void clearPlayerClaims(String uniqueID) {
+        for (Claim claim : getPlayerClaims(uniqueID)) {
+            claim.remove();
+        }
     }
 
     public void removeClaim(Claim claim) {

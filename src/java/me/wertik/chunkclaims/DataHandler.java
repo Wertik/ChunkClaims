@@ -12,6 +12,7 @@ import java.util.List;
 
 public class DataHandler {
 
+    private ConfigurationSection claimsSection;
     private YamlConfiguration claimsYaml;
     private File claimsFile;
 
@@ -21,6 +22,7 @@ public class DataHandler {
         if (!claimsFile.exists()) {
             claimsYaml = YamlConfiguration.loadConfiguration(claimsFile);
             Main.getInstance().saveResource("claims.yml", false);
+            claimsYaml.createSection("claims");
             claimsYaml.options().copyDefaults(true);
             try {
                 claimsYaml.save(claimsFile);
@@ -30,24 +32,31 @@ public class DataHandler {
             }
         } else
             claimsYaml = YamlConfiguration.loadConfiguration(claimsFile);
+
+        claimsSection = claimsYaml.getConfigurationSection("claims");
         Main.getInstance().getServer().getLogger().info("Loaded claims.yml");
     }
 
-    public void saveClaim(Claim claim) {
-
+    public void saveClaim(Claim claim, int id) {
         ConfigurationSection playerSection;
-        if (claimsYaml.contains(claim.getOwnerUUID()))
-            playerSection = claimsYaml.getConfigurationSection(claim.getOwnerUUID());
-        else
-            playerSection = claimsYaml.createSection(claim.getOwnerUUID());
 
-        ConfigurationSection section = claimsYaml.getConfigurationSection(claim.getOwnerUUID()).createSection(String.valueOf(playerSection.getKeys(false).size()));
+        if (!claimsSection.contains(claim.getOwnerUUID()))
+            playerSection = claimsSection.createSection(claim.getOwnerUUID());
+        else
+            playerSection = claimsSection.getConfigurationSection(claim.getOwnerUUID());
+
+        if (playerSection == null)
+            Main.getInstance().getLogger().severe("playerSection == null");
+
+        Main.getInstance().getLogger().info("ID: " + id);
+
+        ConfigurationSection section = playerSection.createSection(String.valueOf(id));
 
         section.set("X", claim.getChunkLocation().getX());
         section.set("Z", claim.getChunkLocation().getZ());
         section.set("World", claim.getChunkLocation().getWorldName());
 
-        section.set("Expire", claim.getExpireTime());
+        section.set("Expire", claim.getExpireTime() - System.currentTimeMillis());
     }
 
     public void saveFile() {
@@ -60,9 +69,12 @@ public class DataHandler {
     }
 
     public void saveClaims() {
+        claimsYaml.set("claims", null);
+        claimsSection = claimsYaml.createSection("claims");
+        int id = 0;
         for (Claim claim : Main.getInstance().getClaimHandler().getClaims()) {
-            // For Each.. ;)
-            saveClaim(claim);
+            saveClaim(claim, id);
+            id++;
         }
         saveFile();
     }
@@ -71,15 +83,15 @@ public class DataHandler {
 
         List<Claim> outputList = new ArrayList<>();
 
-        for (String playerSectionPath : claimsYaml.getKeys(false)) {
-            ConfigurationSection playerSection = claimsYaml.getConfigurationSection(playerSectionPath);
+        for (String playerSectionPath : claimsSection.getKeys(false)) {
+            ConfigurationSection playerSection = claimsSection.getConfigurationSection(playerSectionPath);
 
             for (String sectionPath : playerSection.getKeys(false)) {
                 ConfigurationSection section = playerSection.getConfigurationSection(sectionPath);
 
                 ChunkLocation chunkLocation = new ChunkLocation(section.getString("World"), section.getInt("X"), section.getInt("Z"));
 
-                outputList.add(new Claim(playerSectionPath, chunkLocation, section.getLong("Expire"), true));
+                outputList.add(new Claim(playerSectionPath, chunkLocation, section.getLong("Expire") + System.currentTimeMillis()));
             }
         }
         return outputList;

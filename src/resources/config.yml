@@ -1,3 +1,15 @@
-expire-time: 6000
-change-owner-on-death: false
-combat-timer: 1000
+global-options:
+  expire-time: 3600
+  change-owner-on-death: false
+  combat-timer: 10
+  max-claims: 3
+tool:
+  enabled: true
+  item-type: GOLD_SPADE
+  name: '&3Claim tool'
+  lore:
+  - '&7Left click in a chunk to claim it.'
+  - '&7Use /chunkclaims show to highlight chunk you are standing in.'
+  glowing: true
+  uses: 5
+  claim-time: 5

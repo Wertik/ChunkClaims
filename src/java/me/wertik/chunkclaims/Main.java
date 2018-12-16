@@ -3,7 +3,10 @@ package me.wertik.chunkclaims;
 import me.wertik.chunkclaims.commands.MainCommand;
 import me.wertik.chunkclaims.handlers.ClaimHandler;
 import me.wertik.chunkclaims.handlers.CombatHandler;
+import me.wertik.chunkclaims.handlers.ToolHandler;
 import me.wertik.chunkclaims.listeners.ClaimListener;
+import me.wertik.chunkclaims.listeners.CombatListener;
+import me.wertik.chunkclaims.listeners.ToolListener;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class Main extends JavaPlugin {
@@ -16,6 +19,7 @@ public class Main extends JavaPlugin {
     private ClaimHandler claimHandler;
     private DataHandler dataHandler;
     private CombatHandler combatHandler;
+    private ToolHandler toolHandler;
 
     @Override
     public void onEnable() {
@@ -26,9 +30,12 @@ public class Main extends JavaPlugin {
         claimHandler = new ClaimHandler();
         dataHandler = new DataHandler();
         combatHandler = new CombatHandler();
+        toolHandler = new ToolHandler();
         getCommand("chunkclaims").setExecutor(new MainCommand());
+        getCommand("ccs").setExecutor(new MainCommand());
         getServer().getPluginManager().registerEvents(new ClaimListener(), this);
-        getServer().getPluginManager().registerEvents(new CombatHandler(), this);
+        getServer().getPluginManager().registerEvents(new CombatListener(), this);
+        getServer().getPluginManager().registerEvents(new ToolListener(), this);
         info("§aClasses loaded");
 
         configLoader.loadYamls();
@@ -63,5 +70,9 @@ public class Main extends JavaPlugin {
 
     public CombatHandler getCombatHandler() {
         return combatHandler;
+    }
+
+    public ToolHandler getToolHandler() {
+        return toolHandler;
     }
 }

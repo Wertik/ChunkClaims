@@ -1,7 +1,8 @@
 name: ChunkClaims
 author: Wertik1206
-version: dev-1.0
+version: alpha-1.0
 main: me.wertik.chunkclaims.Main
 commands:
   chunkclaims:
     description: Main command to handle the plugin.
+    aliases: ccs
